@@ -1,0 +1,4 @@
+{
+  "kind": "EvalMatrixChart",
+  "spec": { "rowLabels": ["model"], "columnLabel": "metric" }
+}
