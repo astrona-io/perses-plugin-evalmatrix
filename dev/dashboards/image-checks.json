@@ -1,0 +1,129 @@
+{
+  "kind": "Dashboard",
+  "metadata": {
+    "name": "image-checks",
+    "project": "demo"
+  },
+  "spec": {
+    "display": {
+      "name": "Image checks"
+    },
+    "duration": "15m",
+    "refreshInterval": "15s",
+    "variables": [],
+    "panels": {
+      "checks": {
+        "kind": "Panel",
+        "spec": {
+          "display": {
+            "name": "Image checks vs the previous build",
+            "description": "OAT-style checks per image, dependents under their base image."
+          },
+          "plugin": {
+            "kind": "EvalMatrixChart",
+            "spec": {
+              "rowLabels": [
+                "image"
+              ],
+              "columnLabel": "check",
+              "rowTree": "base_image",
+              "baseline": {
+                "mode": "previousRun"
+              },
+              "columns": [
+                {
+                  "name": "startup_seconds",
+                  "displayName": "startup",
+                  "better": "lower",
+                  "format": {
+                    "unit": "seconds"
+                  },
+                  "tolerance": {
+                    "mode": "relative",
+                    "same": 0.05,
+                    "large": 0.2
+                  }
+                },
+                {
+                  "name": "image_size_mb",
+                  "displayName": "size (MB)",
+                  "better": "lower",
+                  "format": {
+                    "unit": "decimal",
+                    "decimalPlaces": 0
+                  },
+                  "tolerance": {
+                    "mode": "relative",
+                    "same": 0.02,
+                    "large": 0.05
+                  }
+                },
+                {
+                  "name": "cve_high",
+                  "displayName": "high CVEs",
+                  "better": "lower",
+                  "format": {
+                    "unit": "decimal",
+                    "decimalPlaces": 0
+                  },
+                  "tolerance": {
+                    "mode": "absolute",
+                    "same": 0,
+                    "large": 2
+                  }
+                },
+                {
+                  "name": "smoke_pass_ratio",
+                  "displayName": "smoke pass",
+                  "better": "higher",
+                  "format": {
+                    "unit": "percent-decimal",
+                    "decimalPlaces": 1
+                  },
+                  "tolerance": {
+                    "mode": "absolute",
+                    "same": 0.005,
+                    "large": 0.05
+                  }
+                }
+              ],
+              "cellLink": "https://ci.example.com/builds/${run_id}?image=${row}&check=${column}",
+              "cellLinkLabel": "Open build logs"
+            }
+          },
+          "queries": [
+            {
+              "kind": "TimeSeriesQuery",
+              "spec": {
+                "plugin": {
+                  "kind": "PrometheusTimeSeriesQuery",
+                  "spec": {
+                    "query": "image_check_value"
+                  }
+                }
+              }
+            }
+          ]
+        }
+      }
+    },
+    "layouts": [
+      {
+        "kind": "Grid",
+        "spec": {
+          "items": [
+            {
+              "x": 0,
+              "y": 0,
+              "width": 24,
+              "height": 16,
+              "content": {
+                "$ref": "#/spec/panels/checks"
+              }
+            }
+          ]
+        }
+      }
+    ]
+  }
+}

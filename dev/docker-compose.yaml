@@ -1,0 +1,46 @@
+# A local Perses with the plugin, a Pushgateway fed by three fake producers (LLM evals, Hubble-style
+# flows, OAT-style image checks), and the Prometheus that scrapes it. Works with `podman compose`
+# and `docker compose`; see the README.
+name: perses-plugin-evalmatrix
+
+services:
+  pushgateway:
+    image: docker.io/prom/pushgateway:v1.11.5
+    ports:
+      - "127.0.0.1:${PUSHGATEWAY_PORT:-18186}:9091"
+
+  fake-data:
+    image: docker.io/curlimages/curl:8.11.1
+    entrypoint:
+      - /bin/sh
+      - -c
+      - /dev-evalmatrix/fake-evals.sh & /dev-evalmatrix/fake-flows.sh & /dev-evalmatrix/fake-checks.sh & wait
+    environment:
+      PUSHGATEWAY_URL: http://pushgateway:9091
+      INTERVAL: "${INTERVAL:-30}"
+    volumes:
+      - ./eval-push.sh:/dev-evalmatrix/eval-push.sh:ro,z
+      - ./fake-evals.sh:/dev-evalmatrix/fake-evals.sh:ro,z
+      - ./fake-flows.sh:/dev-evalmatrix/fake-flows.sh:ro,z
+      - ./fake-checks.sh:/dev-evalmatrix/fake-checks.sh:ro,z
+    depends_on: [pushgateway]
+
+  prometheus:
+    image: docker.io/prom/prometheus:v3.5.0
+    command: ["--config.file=/etc/prometheus/prometheus.yml"]
+    volumes:
+      - ./prometheus.yml:/etc/prometheus/prometheus.yml:ro,z
+    depends_on: [pushgateway]
+
+  perses:
+    image: docker.io/persesdev/perses:v0.55.1
+    command: ["--config", "/etc/perses/config.yaml"]
+    ports:
+      - "127.0.0.1:${PERSES_PORT:-18086}:8080"
+    volumes:
+      - ./perses.yaml:/etc/perses/config.yaml:ro,z
+      - ./provisioning:/etc/perses/provisioning:ro,z
+      - ./dashboards:/etc/perses/dashboards:ro,z
+      # Holds EvalMatrix-<version>.tar.gz from `percli plugin build`.
+      - ./archive:/etc/perses/plugins-archive-evalmatrix:ro,z
+    depends_on: [prometheus]

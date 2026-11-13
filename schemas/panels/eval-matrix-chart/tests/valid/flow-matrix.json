@@ -1,0 +1,12 @@
+{
+  "kind": "EvalMatrixChart",
+  "spec": {
+    "rowLabels": ["source_namespace"],
+    "columnLabel": "destination_namespace",
+    "runLabel": "window",
+    "baseline": { "mode": "previousRun" },
+    "rowTree": "source_cluster",
+    "tolerance": { "mode": "absolute", "same": 0.5 },
+    "columns": [{ "name": "kube-system", "better": "lower" }]
+  }
+}

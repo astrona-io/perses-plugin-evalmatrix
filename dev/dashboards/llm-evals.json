@@ -1,0 +1,264 @@
+{
+  "kind": "Dashboard",
+  "metadata": {
+    "name": "llm-evals",
+    "project": "demo"
+  },
+  "spec": {
+    "display": {
+      "name": "LLM evals"
+    },
+    "duration": "15m",
+    "refreshInterval": "15s",
+    "variables": [],
+    "panels": {
+      "vs_reference": {
+        "kind": "Panel",
+        "spec": {
+          "display": {
+            "name": "Models vs the reference model",
+            "description": "Newest run per model and prompt version, compared with reference · v1. Click a cell for the change, sample size and failing cases."
+          },
+          "plugin": {
+            "kind": "EvalMatrixChart",
+            "spec": {
+              "rowLabels": [
+                "model",
+                "prompt_version"
+              ],
+              "columnLabel": "metric",
+              "baseline": {
+                "mode": "row",
+                "row": "reference · v1"
+              },
+              "columns": [
+                {
+                  "name": "faithfulness",
+                  "better": "higher",
+                  "format": {
+                    "unit": "percent-decimal",
+                    "decimalPlaces": 1
+                  }
+                },
+                {
+                  "name": "answer_relevance",
+                  "displayName": "relevance",
+                  "better": "higher",
+                  "format": {
+                    "unit": "percent-decimal",
+                    "decimalPlaces": 1
+                  }
+                },
+                {
+                  "name": "toxicity",
+                  "better": "lower",
+                  "format": {
+                    "unit": "percent-decimal",
+                    "decimalPlaces": 2
+                  },
+                  "tolerance": {
+                    "mode": "relative",
+                    "same": 0.05,
+                    "large": 0.3
+                  }
+                },
+                {
+                  "name": "latency_p95_seconds",
+                  "displayName": "p95 latency",
+                  "better": "lower",
+                  "format": {
+                    "unit": "seconds"
+                  },
+                  "tolerance": {
+                    "mode": "relative",
+                    "same": 0.03,
+                    "large": 0.25
+                  }
+                },
+                {
+                  "name": "cost_per_case_usd",
+                  "displayName": "cost / case",
+                  "better": "lower",
+                  "format": {
+                    "unit": "decimal",
+                    "decimalPlaces": 4
+                  },
+                  "tolerance": {
+                    "mode": "relative",
+                    "same": 0.03,
+                    "large": 0.25
+                  }
+                }
+              ],
+              "tolerance": {
+                "mode": "relative",
+                "same": 0.01,
+                "large": 0.1
+              },
+              "sampleSizeQuery": 1,
+              "cellLink": "https://evals.example.com/runs/${run_id}?model=${row}&metric=${column}&filter=failed"
+            }
+          },
+          "queries": [
+            {
+              "kind": "TimeSeriesQuery",
+              "spec": {
+                "plugin": {
+                  "kind": "PrometheusTimeSeriesQuery",
+                  "spec": {
+                    "query": "llm_eval_score"
+                  }
+                }
+              }
+            },
+            {
+              "kind": "TimeSeriesQuery",
+              "spec": {
+                "plugin": {
+                  "kind": "PrometheusTimeSeriesQuery",
+                  "spec": {
+                    "query": "llm_eval_cases_total"
+                  }
+                }
+              }
+            }
+          ]
+        }
+      },
+      "vs_previous": {
+        "kind": "Panel",
+        "spec": {
+          "display": {
+            "name": "Each model vs its previous run",
+            "description": "Regression check between eval runs."
+          },
+          "plugin": {
+            "kind": "EvalMatrixChart",
+            "spec": {
+              "rowLabels": [
+                "model",
+                "prompt_version"
+              ],
+              "columnLabel": "metric",
+              "baseline": {
+                "mode": "previousRun"
+              },
+              "columns": [
+                {
+                  "name": "faithfulness",
+                  "better": "higher",
+                  "format": {
+                    "unit": "percent-decimal",
+                    "decimalPlaces": 1
+                  }
+                },
+                {
+                  "name": "answer_relevance",
+                  "displayName": "relevance",
+                  "better": "higher",
+                  "format": {
+                    "unit": "percent-decimal",
+                    "decimalPlaces": 1
+                  }
+                },
+                {
+                  "name": "toxicity",
+                  "better": "lower",
+                  "format": {
+                    "unit": "percent-decimal",
+                    "decimalPlaces": 2
+                  },
+                  "tolerance": {
+                    "mode": "relative",
+                    "same": 0.05,
+                    "large": 0.3
+                  }
+                },
+                {
+                  "name": "latency_p95_seconds",
+                  "displayName": "p95 latency",
+                  "better": "lower",
+                  "format": {
+                    "unit": "seconds"
+                  },
+                  "tolerance": {
+                    "mode": "relative",
+                    "same": 0.03,
+                    "large": 0.25
+                  }
+                },
+                {
+                  "name": "cost_per_case_usd",
+                  "displayName": "cost / case",
+                  "better": "lower",
+                  "format": {
+                    "unit": "decimal",
+                    "decimalPlaces": 4
+                  },
+                  "tolerance": {
+                    "mode": "relative",
+                    "same": 0.03,
+                    "large": 0.25
+                  }
+                }
+              ],
+              "sampleSizeQuery": 1,
+              "cellLink": "https://evals.example.com/runs/${run_id}?model=${row}&metric=${column}&filter=failed"
+            }
+          },
+          "queries": [
+            {
+              "kind": "TimeSeriesQuery",
+              "spec": {
+                "plugin": {
+                  "kind": "PrometheusTimeSeriesQuery",
+                  "spec": {
+                    "query": "llm_eval_score"
+                  }
+                }
+              }
+            },
+            {
+              "kind": "TimeSeriesQuery",
+              "spec": {
+                "plugin": {
+                  "kind": "PrometheusTimeSeriesQuery",
+                  "spec": {
+                    "query": "llm_eval_cases_total"
+                  }
+                }
+              }
+            }
+          ]
+        }
+      }
+    },
+    "layouts": [
+      {
+        "kind": "Grid",
+        "spec": {
+          "items": [
+            {
+              "x": 0,
+              "y": 0,
+              "width": 24,
+              "height": 16,
+              "content": {
+                "$ref": "#/spec/panels/vs_reference"
+              }
+            },
+            {
+              "x": 0,
+              "y": 16,
+              "width": 24,
+              "height": 12,
+              "content": {
+                "$ref": "#/spec/panels/vs_previous"
+              }
+            }
+          ]
+        }
+      }
+    ]
+  }
+}

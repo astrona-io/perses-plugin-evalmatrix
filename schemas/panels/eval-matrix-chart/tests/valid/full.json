@@ -1,0 +1,38 @@
+{
+  "kind": "EvalMatrixChart",
+  "spec": {
+    "rowLabels": ["model", "prompt_version"],
+    "columnLabel": "metric",
+    "runLabel": "run_id",
+    "baseline": { "mode": "row", "row": "reference · v1" },
+    "columns": [
+      {
+        "name": "faithfulness",
+        "better": "higher",
+        "format": { "unit": "percent-decimal", "decimalPlaces": 1 }
+      },
+      {
+        "name": "toxicity",
+        "better": "lower",
+        "format": { "unit": "percent-decimal", "decimalPlaces": 1 }
+      },
+      {
+        "name": "latency_p95",
+        "displayName": "p95 latency",
+        "better": "lower",
+        "format": { "unit": "seconds" },
+        "tolerance": { "mode": "relative", "same": 0.05, "large": 0.25 }
+      },
+      {
+        "name": "cost",
+        "displayName": "cost / case",
+        "better": "lower",
+        "format": { "unit": "usd", "decimalPlaces": 4 }
+      }
+    ],
+    "tolerance": { "mode": "relative", "same": 0.01, "large": 0.1 },
+    "sampleSizeQuery": 1,
+    "cellLink": "https://evals.example.com/runs/${run_id}?metric=${column}&filter=failed",
+    "cellLinkLabel": "Open failing cases"
+  }
+}

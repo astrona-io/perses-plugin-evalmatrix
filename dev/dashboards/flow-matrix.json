@@ -1,0 +1,213 @@
+{
+  "kind": "Dashboard",
+  "metadata": {
+    "name": "flow-matrix",
+    "project": "demo"
+  },
+  "spec": {
+    "display": {
+      "name": "Namespace flow matrix"
+    },
+    "duration": "15m",
+    "refreshInterval": "15s",
+    "variables": [],
+    "panels": {
+      "dropped": {
+        "kind": "Panel",
+        "spec": {
+          "display": {
+            "name": "Dropped flows/s, source × destination",
+            "description": "Hubble-style dropped flows per source and destination namespace, compared with the previous window."
+          },
+          "plugin": {
+            "kind": "EvalMatrixChart",
+            "spec": {
+              "rowLabels": [
+                "source_namespace"
+              ],
+              "columnLabel": "destination_namespace",
+              "runLabel": "window",
+              "rowTree": "source_group",
+              "baseline": {
+                "mode": "previousRun"
+              },
+              "columns": [
+                {
+                  "name": "frontend",
+                  "better": "lower",
+                  "format": {
+                    "unit": "decimal",
+                    "decimalPlaces": 2
+                  }
+                },
+                {
+                  "name": "checkout",
+                  "better": "lower",
+                  "format": {
+                    "unit": "decimal",
+                    "decimalPlaces": 2
+                  }
+                },
+                {
+                  "name": "payments",
+                  "better": "lower",
+                  "format": {
+                    "unit": "decimal",
+                    "decimalPlaces": 2
+                  }
+                },
+                {
+                  "name": "catalog",
+                  "better": "lower",
+                  "format": {
+                    "unit": "decimal",
+                    "decimalPlaces": 2
+                  }
+                },
+                {
+                  "name": "kube-system",
+                  "better": "lower",
+                  "format": {
+                    "unit": "decimal",
+                    "decimalPlaces": 2
+                  }
+                },
+                {
+                  "name": "monitoring",
+                  "better": "lower",
+                  "format": {
+                    "unit": "decimal",
+                    "decimalPlaces": 2
+                  }
+                }
+              ],
+              "tolerance": {
+                "mode": "absolute",
+                "same": 0.2,
+                "large": 1
+              },
+              "cellLink": "https://hubble.example.com/?from=${row}&to=${column}&verdict=DROPPED",
+              "cellLinkLabel": "Open dropped flows"
+            }
+          },
+          "queries": [
+            {
+              "kind": "TimeSeriesQuery",
+              "spec": {
+                "plugin": {
+                  "kind": "PrometheusTimeSeriesQuery",
+                  "spec": {
+                    "query": "flow_rate{verdict=\"dropped\"}"
+                  }
+                }
+              }
+            }
+          ]
+        }
+      },
+      "forwarded": {
+        "kind": "Panel",
+        "spec": {
+          "display": {
+            "name": "Forwarded flows/s",
+            "description": "Values only: no baseline."
+          },
+          "plugin": {
+            "kind": "EvalMatrixChart",
+            "spec": {
+              "rowLabels": [
+                "source_namespace"
+              ],
+              "columnLabel": "destination_namespace",
+              "runLabel": "window",
+              "columns": [
+                {
+                  "name": "frontend",
+                  "format": {
+                    "unit": "decimal",
+                    "decimalPlaces": 1
+                  }
+                },
+                {
+                  "name": "checkout",
+                  "format": {
+                    "unit": "decimal",
+                    "decimalPlaces": 1
+                  }
+                },
+                {
+                  "name": "payments",
+                  "format": {
+                    "unit": "decimal",
+                    "decimalPlaces": 1
+                  }
+                },
+                {
+                  "name": "catalog",
+                  "format": {
+                    "unit": "decimal",
+                    "decimalPlaces": 1
+                  }
+                },
+                {
+                  "name": "kube-system",
+                  "format": {
+                    "unit": "decimal",
+                    "decimalPlaces": 1
+                  }
+                },
+                {
+                  "name": "monitoring",
+                  "format": {
+                    "unit": "decimal",
+                    "decimalPlaces": 1
+                  }
+                }
+              ]
+            }
+          },
+          "queries": [
+            {
+              "kind": "TimeSeriesQuery",
+              "spec": {
+                "plugin": {
+                  "kind": "PrometheusTimeSeriesQuery",
+                  "spec": {
+                    "query": "flow_rate{verdict=\"forwarded\"}"
+                  }
+                }
+              }
+            }
+          ]
+        }
+      }
+    },
+    "layouts": [
+      {
+        "kind": "Grid",
+        "spec": {
+          "items": [
+            {
+              "x": 0,
+              "y": 0,
+              "width": 24,
+              "height": 14,
+              "content": {
+                "$ref": "#/spec/panels/dropped"
+              }
+            },
+            {
+              "x": 0,
+              "y": 14,
+              "width": 24,
+              "height": 10,
+              "content": {
+                "$ref": "#/spec/panels/forwarded"
+              }
+            }
+          ]
+        }
+      }
+    ]
+  }
+}
