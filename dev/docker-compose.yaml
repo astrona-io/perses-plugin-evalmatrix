@@ -10,7 +10,7 @@ services:
       - "127.0.0.1:${PUSHGATEWAY_PORT:-18186}:9091"
 
   fake-data:
-    image: docker.io/curlimages/curl:8.11.1
+    image: docker.io/curlimages/curl:8.23.0
     entrypoint:
       - /bin/sh
       - -c
